@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cocktail Explorer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="top">
+    <div>
+      <h1>Cocktail Explorer</h1>
+      <p class="sub">Set your preferences and see which cocktails fit <em>all</em> of them at once. The chart, the bars and the table all react to the same filters.</p>
+    </div>
+    <p class="meta" id="meta"></p>
+  </header>
+
+  <noscript><p class="card setup">This page needs JavaScript to draw the charts.</p></noscript>
+
+  <!-- Shown only when data/cocktails.json has not been created yet -->
+  <div id="setup" class="card setup" hidden>
+    <h2>No cocktail data yet</h2>
+    <p>The website reads <code>web/data/cocktails.json</code>, which is created by the Python download script. In a terminal, in the project folder, run:</p>
+    <pre>python fetch_data.py
+python serve.py</pre>
+    <p>Then reload this page. (See the README for details.)</p>
+  </div>
+
+  <div id="app" hidden>
+    <!-- ONE row of filters above everything they control -->
+    <section class="filters" aria-label="Filters">
+      <div class="card fcard">
+        <div class="fhead"><h2>Strength</h2><output id="abvOut" class="readout"></output></div>
+        <div class="range" id="abvRange" data-lo-label="Minimum strength, percent ABV" data-hi-label="Maximum strength, percent ABV">
+          <div class="track"></div><div class="fill"></div>
+        </div>
+        <label class="check"><input type="checkbox" id="incUnknown"> <span>Include drinks with no reported strength (<span id="unknownCount">0</span>)</span></label>
+      </div>
+
+      <div class="card fcard">
+        <div class="fhead"><h2>Number of ingredients</h2><output id="ingOut" class="readout"></output></div>
+        <div class="range" id="ingRange" data-lo-label="Minimum number of ingredients" data-hi-label="Maximum number of ingredients">
+          <div class="track"></div><div class="fill"></div>
+        </div>
+        <p class="hint">Fewer ingredients means an easier drink.</p>
+      </div>
+
+      <div class="card fcard fhave">
+        <div class="fhead"><h2>Ingredients I have</h2>
+          <div class="modes">
+            <label class="inline">Show drinks that
+              <select id="haveMode" aria-label="How strictly to match your ingredients">
+                <option value="all">use all of these</option>
+                <option value="any">use any of these</option>
+                <option value="make">I can make (only these)</option>
+              </select></label>
+            <label class="inline" id="missWrap" hidden>allowing up to
+              <select id="allowMissing" aria-label="How many missing ingredients are acceptable">
+                <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option>
+              </select> missing</label>
+          </div>
+        </div>
+        <div class="suggest-wrap">
+          <input type="text" id="haveInput" placeholder="Type an ingredient, e.g. lime" autocomplete="off" aria-label="Add an ingredient you have">
+          <ul id="suggest" class="suggest" role="listbox" hidden></ul>
+        </div>
+        <div class="pills" id="havePills" aria-label="Ingredients you have"></div>
+        <p class="hint" id="haveHint"></p>
+        <div class="pills quick" id="quickPills" aria-label="Common ingredients"></div>
+      </div>
+    </section>
+
+    <div class="activebar">
+      <div class="chips" id="chips" aria-live="polite"></div>
+      <button type="button" id="resetAll" class="btn">Reset all filters</button>
+    </div>
+
+    <main class="layout">
+      <div class="leftcol">
+        <section class="card">
+          <div class="chead">
+            <div>
+              <h2>Strength vs. number of ingredients</h2>
+              <p class="hint">Each dot is one cocktail. <strong>Drag a box</strong> on the chart to set both ranges, <strong>click</strong> a dot to pin it.</p>
+            </div>
+            <ul class="legend" aria-label="Legend">
+              <li><span class="key k-match"></span>Matches all filters</li>
+              <li><span class="key k-ghost"></span>Filtered out</li>
+              <li><span class="key k-sel"></span>Pinned</li>
+            </ul>
+          </div>
+          <div class="chartwrap" id="chartwrap">
+            <canvas id="scatter" role="img" aria-label="Scatter chart of cocktails"></canvas>
+            <div id="tip" class="tip" hidden></div>
+          </div>
+          <p class="hint" id="scatterNote"></p>
+        </section>
+
+        <section class="card">
+          <div class="chead"><div><h2>Where the matches are</h2>
+            <p class="hint">Bars count drinks that match every <em>other</em> filter. Click bars to filter; the chart and table update together.</p></div></div>
+          <div class="bars" id="bars"></div>
+        </section>
+
+        <section class="card">
+          <div class="chead"><div><h2 id="countHead">Matching cocktails</h2>
+            <p class="hint">Table view of the same drinks shown as blue dots. Click a column to sort; hover or click a row to see its details.</p></div></div>
+          <div class="tablewrap">
+            <table id="table"><thead></thead><tbody></tbody></table>
+          </div>
+          <div class="more"><button type="button" class="btn" id="moreRows" hidden></button></div>
+        </section>
+      </div>
+
+      <aside class="detail card" id="detail" aria-live="polite"></aside>
+    </main>
+
+    <footer class="foot" id="foot"></footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

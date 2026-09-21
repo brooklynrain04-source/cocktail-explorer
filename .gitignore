@@ -1,0 +1,8 @@
+# Cached API responses (about 500 small files). Anyone can re-create them with: python fetch_data.py
+data/raw/
+
+# Python and OS clutter
+__pycache__/
+*.pyc
+.DS_Store
+Thumbs.db
